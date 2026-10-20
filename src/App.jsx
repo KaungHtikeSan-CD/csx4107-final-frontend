@@ -107,7 +107,7 @@ function Status({ value }) {
   return (
     <span className={`status ${value.toLowerCase()}`}>
       <i />
-      {value === "Close" ? "Closed" : value === "Cancel" ? "Cancelled" : "Open"}
+      {value === "Close" ? "Canceled" : value === "Cancel" ? "Cancelled" : "Open"}
     </span>
   );
 }
@@ -848,9 +848,7 @@ function CourseDetails() {
                       : course.enrolled
                         ? "You're enrolled"
                         : course.status !== "Open"
-                          ? course.status === "Cancel"
-                            ? "Course cancelled"
-                            : "Enrollment closed"
+                          ? "Enrollment closed"
                           : !course.seatsRemaining
                             ? "Course full"
                             : "Enroll in this course"}
