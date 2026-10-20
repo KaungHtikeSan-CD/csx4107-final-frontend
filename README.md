@@ -135,7 +135,7 @@ The authenticated teacher determines ownership; client-supplied owner and studen
 
 ## Verification completed
 
-Both production builds passed. The isolated real-MongoDB integration suite passed 54 checks. Browser checks covered student login, enrollment and My learning, teacher login, course creation and editing, form reset between editing and creating, and mobile layout at 390px width with no horizontal overflow. Live database checks are completed separately after production configuration.
+Both production builds passed. The isolated real-MongoDB integration suite passed 54 checks. Browser checks covered student login, enrollment and My learning, teacher login, course creation and editing, form reset between editing and creating, and mobile layout at 390px width with no horizontal overflow. The public backend passed 25 additional production checks against Atlas, including all six logins, course CRUD, ownership/role restrictions, course statuses, capacity, duplicate prevention, CORS, and logout. The live frontend was also used to enroll student1 in Designing for the web; teacher2 could see that student and the delete control was disabled. The public production URLs are accessible without a Vercel login.
 
 ## Implementation notes
 
@@ -173,5 +173,5 @@ Use the repository with a different Root Directory for each project, or import t
 - [x] Open/Close/Cancel rules, capacity limits and duplicate prevention
 - [x] Responsive interface, loading/error/empty states and session handling
 - [x] Environment examples, seeding, test instructions, Vercel project configuration
-- [ ] Both deployments verified and URLs recorded above
+- [x] Both deployments verified and URLs recorded above
 - [ ] Student information and recording link completed
