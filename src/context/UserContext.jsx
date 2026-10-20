@@ -1,6 +1,6 @@
-import { createContext, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { request } from "../lib/api";
-export const UserContext = createContext(null);
+import { UserContext } from "./UserContextValue";
 const KEY = "coursespace_session";
 export function UserProvider({ children }) {
   const [token, setToken] = useState(() => sessionStorage.getItem(KEY) || "");

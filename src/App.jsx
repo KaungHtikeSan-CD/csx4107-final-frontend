@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import {
   HashRouter,
   Navigate,
@@ -9,7 +9,7 @@ import {
   useParams,
   useSearchParams,
 } from "react-router-dom";
-import { UserContext } from "./context/UserContext";
+import { UserContext } from "./context/UserContextValue";
 import "./App.css";
 
 const money = (n) =>
@@ -409,35 +409,36 @@ function CourseList({ enrolled = false }) {
   const [params, setParams] = useSearchParams();
   const search = params.get("q") || "";
   const [query, setQuery] = useState(search);
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [result, setResult] = useState({ key: null, courses: [], error: "" });
   const [status, setStatus] = useState("All");
   const [retry, setRetry] = useState(0);
   const teacher = user.role === "Teacher";
+  const requestKey = `${user.id}:${enrolled}:${search}:${retry}`;
+  const loading = result.key !== requestKey;
+  const courses = loading ? [] : result.courses;
+  const error = loading ? "" : result.error;
   useEffect(() => {
     let active = true;
-    setLoading(true);
-    setError("");
     api(`/api/course?enrolled=${enrolled}&q=${encodeURIComponent(search)}`)
       .then((data) => {
-        if (active) setCourses(data.courses);
+        if (active)
+          setResult({ key: requestKey, courses: data.courses, error: "" });
       })
       .catch((e) => {
         if (active)
-          setError(
-            e.message === "Failed to fetch"
-              ? "Unable to reach the server. Please try again."
-              : e.message,
-          );
-      })
-      .finally(() => {
-        if (active) setLoading(false);
+          setResult({
+            key: requestKey,
+            courses: [],
+            error:
+              e.message === "Failed to fetch"
+                ? "Unable to reach the server. Please try again."
+                : e.message,
+          });
       });
     return () => {
       active = false;
     };
-  }, [api, enrolled, search, retry]);
+  }, [api, enrolled, search, retry, requestKey]);
   const shown = courses.filter((c) => status === "All" || c.status === status);
   return (
     <div className="page-content">
@@ -637,17 +638,22 @@ function CourseDetails() {
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const load = useCallback(async () => {
-    try {
-      const data = await api(`/api/course/${id}`);
-      setCourse(data.course);
-    } catch (e) {
-      setError(e.message);
-    }
-  }, [api, id]);
   useEffect(() => {
-    load();
-  }, [load]);
+    let active = true;
+    api(`/api/course/${id}`)
+      .then(({ course }) => {
+        if (active) {
+          setCourse(course);
+          setError("");
+        }
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [api, id]);
   async function enroll() {
     setBusy(true);
     setError("");
@@ -657,7 +663,12 @@ function CourseDetails() {
       setMessage("You're in! This course is now in My learning.");
     } catch (e) {
       setError(e.message);
-      await load();
+      try {
+        const data = await api(`/api/course/${id}`);
+        setCourse(data.course);
+      } catch {
+        // Keep the enrollment error visible if refreshing also fails.
+      }
     } finally {
       setBusy(false);
     }
@@ -896,30 +907,29 @@ function CourseForm() {
   const [form, setForm] = useState(emptyCourse);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [loading, setLoading] = useState(Boolean(id));
   const [enrolledCount, setEnrolledCount] = useState(0);
-  const loadedId = useRef(null);
+  const [loadedId, setLoadedId] = useState(null);
+  const [loadError, setLoadError] = useState({ id: null, message: "" });
+  const loading = Boolean(id && loadedId !== id && loadError.id !== id);
   useEffect(() => {
-    if (!id || loadedId.current === id) return;
+    if (!id || loadedId === id) return;
     let active = true;
     api(`/api/course/${id}`)
       .then(({ course }) => {
         if (active) {
           setForm({ ...course, topics: course.topics.join("\n") });
           setEnrolledCount(course.enrolledCount);
-          loadedId.current = id;
+          setLoadedId(id);
+          setLoadError({ id: null, message: "" });
         }
       })
       .catch((e) => {
-        if (active) setError(e.message);
-      })
-      .finally(() => {
-        if (active) setLoading(false);
+        if (active) setLoadError({ id, message: e.message });
       });
     return () => {
       active = false;
     };
-  }, [api, id]);
+  }, [api, id, loadedId]);
   if (user.role !== "Teacher") return <Navigate to="/courses" replace />;
   function field(key) {
     return {
@@ -970,7 +980,9 @@ function CourseForm() {
           ? "Update the details, keep the learning going."
           : "Create a course and give your knowledge a place to grow."}
       </p>
-      <ErrorBox message={error} />
+      <ErrorBox
+        message={error || (loadError.id === id ? loadError.message : "")}
+      />
       {loading ? (
         <Loading />
       ) : (
@@ -1074,7 +1086,7 @@ function CourseForm() {
             </button>
             <button
               className="button primary"
-              disabled={busy || (Boolean(id) && loadedId.current !== id)}
+              disabled={busy || (Boolean(id) && loadedId !== id)}
             >
               {busy ? "Saving…" : id ? "Save changes" : "Create course"}
               <Icon name="arrow" />
