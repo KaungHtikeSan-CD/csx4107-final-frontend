@@ -9,16 +9,16 @@ Continues the supplied starter project. This repository contains the frontend ap
 - Student ID: 6715133
 - Backend repository: https://github.com/KaungHtikeSan-CD/csx4107-final-backend
 - Frontend repository: https://github.com/KaungHtikeSan-CD/csx4107-final-frontend
-- Deployed backend URL: [add backend URL]
-- Deployed frontend URL: [add frontend URL]
+- Deployed backend URL: https://csx4107-6715133-backend.vercel.app
+- Deployed frontend URL: https://csx4107-6715133-frontend.vercel.app
 - Screen and camera recording: [add recording link]
 
 ## Test credentials
 
 Run the seed script once before testing. Usernames and emails are case-insensitive.
 
-| Role | Username | Email | Password |
-| --- | --- | --- | --- |
+| Role    | Username | Email                     | Password    |
+| ------- | -------- | ------------------------- | ----------- |
 | Teacher | teacher1 | teacher1@coursespace.test | Teacher123! |
 | Teacher | teacher2 | teacher2@coursespace.test | Teacher123! |
 | Teacher | teacher3 | teacher3@coursespace.test | Teacher123! |
@@ -113,25 +113,29 @@ The test suite starts an isolated, temporary real MongoDB server and a productio
 
 All endpoints except login and health require `Authorization: Bearer <token>`. Responses use JSON and include a `message` for errors.
 
-| Method | Endpoint | Behavior |
-| --- | --- | --- |
-| POST | /api/auth/login | `{login, password}` → `{user, token}` |
-| POST | /api/auth/logout | Invalidates all existing tokens for the current account |
-| GET | /api/user | Current user's safe profile |
-| GET | /api/user/:user_id | Own profile only |
-| GET | /api/course | Own courses for Teachers; non-cancelled courses for Students |
-| GET | /api/course?q=text | Case-insensitive course/teacher substring filter |
-| GET | /api/course?enrolled=true | Student's non-cancelled enrolled courses |
-| POST | /api/course | Teacher creates course |
-| GET | /api/course/:course_id | Authorized course details; owner gets enrolled students |
-| PUT/PATCH | /api/course/:course_id | Owner updates full course details |
-| DELETE | /api/course/:course_id | Owner deletes only when students array is empty |
-| POST | /api/course/:course_id/enroll | Student enrolls, subject to status, uniqueness, and capacity |
-| GET | /api/health | Backend and database connection status |
+| Method    | Endpoint                      | Behavior                                                     |
+| --------- | ----------------------------- | ------------------------------------------------------------ |
+| POST      | /api/auth/login               | `{login, password}` → `{user, token}`                        |
+| POST      | /api/auth/logout              | Invalidates all existing tokens for the current account      |
+| GET       | /api/user                     | Current user's safe profile                                  |
+| GET       | /api/user/:user_id            | Own profile only                                             |
+| GET       | /api/course                   | Own courses for Teachers; non-cancelled courses for Students |
+| GET       | /api/course?q=text            | Case-insensitive course/teacher substring filter             |
+| GET       | /api/course?enrolled=true     | Student's non-cancelled enrolled courses                     |
+| POST      | /api/course                   | Teacher creates course                                       |
+| GET       | /api/course/:course_id        | Authorized course details; owner gets enrolled students      |
+| PUT/PATCH | /api/course/:course_id        | Owner updates full course details                            |
+| DELETE    | /api/course/:course_id        | Owner deletes only when students array is empty              |
+| POST      | /api/course/:course_id/enroll | Student enrolls, subject to status, uniqueness, and capacity |
+| GET       | /api/health                   | Backend and database connection status                       |
 
 Course create/update body: `{name, duration, topics: [string], price, maxStudent, status: "Open" | "Close" | "Cancel"}`.
 The authenticated teacher determines ownership; client-supplied owner and student fields are ignored.
 401 = missing/expired login, 403 = wrong role or owner, 404 = missing/hidden course, 400 = invalid input, 409 = violated business rule.
+
+## Verification completed
+
+Both production builds passed. The isolated real-MongoDB integration suite passed 54 checks. Browser checks covered student login, enrollment and My learning, teacher login, course creation and editing, form reset between editing and creating, and mobile layout at 390px width with no horizontal overflow. Live database checks are completed separately after production configuration.
 
 ## Implementation notes
 
