@@ -11,7 +11,6 @@ Continues the supplied starter project. This repository contains the frontend ap
 - Frontend repository: https://github.com/KaungHtikeSan-CD/csx4107-final-frontend
 - Deployed backend URL: https://csx4107-6715133-backend.vercel.app
 - Deployed frontend URL: https://csx4107-6715133-frontend.vercel.app
-- Screen and camera recording: [add recording link]
 
 ## Test credentials
 
