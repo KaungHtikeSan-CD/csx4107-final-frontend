@@ -848,7 +848,9 @@ function CourseDetails() {
                       : course.enrolled
                         ? "You're enrolled"
                         : course.status !== "Open"
-                          ? "Enrollment closed"
+                          ? course.status === "Cancel"
+                            ? "Course cancelled"
+                            : "Enrollment closed"
                           : !course.seatsRemaining
                             ? "Course full"
                             : "Enroll in this course"}
